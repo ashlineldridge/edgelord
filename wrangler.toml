@@ -5,3 +5,7 @@ account_id = ""
 workers_dev = true
 route = ""
 zone_id = ""
+
+kv_namespaces = [
+  { binding = "config", preview_id = "f31827cab74d4e488f06241263b8a771", id = "e894e98ea11f42f7b7a2b91b30e9449c" }
+]

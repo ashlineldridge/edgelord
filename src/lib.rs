@@ -1,22 +1,18 @@
-extern crate cfg_if;
-extern crate wasm_bindgen;
-
-mod utils;
-
-use cfg_if::cfg_if;
+use js_sys::Promise;
 use wasm_bindgen::prelude::*;
+use worker_kv::*;
 
-cfg_if! {
-    // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
-    // allocator.
-    if #[cfg(feature = "wee_alloc")] {
-        extern crate wee_alloc;
-        #[global_allocator]
-        static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-    }
+async fn list() -> Result<JsValue, KvError> {
+    let kv = KvStore::create("config")?;
+    let list_response = kv.list().limit(100).execute().await?;
+
+    // Returns a pretty printed version of the listed key value pairs.
+    serde_json::to_string_pretty(&list_response)
+        .map(Into::into)
+        .map_err(Into::into)
 }
 
 #[wasm_bindgen]
-pub fn greet() -> String {
-    "Hello, wasm-worker!".to_string()
+pub fn start() -> Promise {
+    wasm_bindgen_futures::future_to_promise(async { list().await.map_err(Into::into) })
 }
